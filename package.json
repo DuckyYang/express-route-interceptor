@@ -1,0 +1,22 @@
+{
+  "name": "express-route-inceptor",
+  "version": "1.0.0",
+  "description": "A light-weight module to build restful api route with express",
+  "main": "src/main.ts",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitee.com:duckyYang/express-route-inceptor.git"
+  },
+  "author": "Ducky Yang",
+  "license": "MIT"
+}
