@@ -1,10 +1,10 @@
 /*
  * @Author: Ducky Yang
  * @Date: 2021-02-03 14:58:10
- * @LastEditTime: 2021-02-03 17:45:44
+ * @LastEditTime: 2021-02-03 22:08:23
  * @LastEditors: Ducky Yang
  * @Description:
- * @FilePath: \express-route-inceptor\src\route-meta.ts
+ * @FilePath: /express-route-interceptor/src/route-meta.ts
  */
 
 type paramFrom = "path" | "query" | "body" | "header" | "cookie";
@@ -44,7 +44,7 @@ class RouteMethodMeta {
   /**
    * method call
    */
-  methodFn: Function = () => {};
+  executor: Function = () => {};
 }
 
 class RouteParamMeta {
@@ -62,4 +62,4 @@ class RouteParamMeta {
   from: paramFrom = "path";
 }
 
-export { RouteMeta, RouteMethodMeta, RouteParamMeta, paramFrom, httpMethod };
+export { RouteMeta, RouteMethodMeta, RouteParamMeta, paramFrom, httpMethod};

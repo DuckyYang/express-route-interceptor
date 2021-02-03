@@ -1,10 +1,10 @@
 /*
  * @Author: Ducky Yang
  * @Date: 2021-02-03 14:24:12
- * @LastEditTime: 2021-02-03 17:38:07
+ * @LastEditTime: 2021-02-03 22:10:48
  * @LastEditors: Ducky Yang
  * @Description: route decorator
- * @FilePath: \express-route-inceptor\src\route-decorator.ts
+ * @FilePath: /express-route-interceptor/src/route-decorator.ts
  */
 
 import {
@@ -13,7 +13,7 @@ import {
   RouteParamMeta,
   paramFrom,
 } from "./route-meta";
-import RouteInceptor from "./route-inceptor";
+import RouteInterceptor from "./route-interceptor";
 
 /**
  *
@@ -26,8 +26,8 @@ import RouteInceptor from "./route-inceptor";
 export function RoutePrefix(prefix: string) {
   return function (target: any) {
     let newMeta = false;
-    const metaName = target.constructor.name;
-    let meta = RouteInceptor.getRouteMeta(metaName);
+    const metaName = target.name;
+    let meta = RouteInterceptor.getMeta(metaName);
     if (!meta) {
       meta = new RouteMeta();
       meta.name = metaName;
@@ -37,7 +37,7 @@ export function RoutePrefix(prefix: string) {
     meta.prefix = prefix;
 
     if (newMeta) {
-      RouteInceptor.registe(meta);
+      RouteInterceptor.addMeta(meta);
     }
   };
 }
@@ -53,7 +53,7 @@ const MethodFactory = (httpMethod: string) => {
 
       let newMeta = false,
         newMethod = false;
-      let meta = RouteInceptor.getRouteMeta(metaName);
+      let meta = RouteInterceptor.getMeta(metaName);
       if (!meta) {
         meta = new RouteMeta();
         meta.name = metaName;
@@ -67,7 +67,7 @@ const MethodFactory = (httpMethod: string) => {
 
         newMethod = true;
       }
-      methodMeta.methodFn = typeof descriptor.value === "function" ? descriptor.value : ()=>{};
+      methodMeta.executor = typeof descriptor.value === "function" ? descriptor.value : ()=>{};
       methodMeta.method = httpMethod;
       methodMeta.template = template;
 
@@ -75,7 +75,7 @@ const MethodFactory = (httpMethod: string) => {
         meta.routes.push(methodMeta);
       }
       if (newMeta) {
-        RouteInceptor.registe(meta);
+        RouteInterceptor.addMeta(meta);
       }
     };
   };
@@ -85,7 +85,7 @@ const ParamFactory = (paramFrom: paramFrom) => {
   return function (paramName: string) {
     return function (target: any, methodName: string, parameterIndex: number) {
       const metaName = target.constructor.name;
-      let meta = RouteInceptor.getRouteMeta(metaName);
+      let meta = RouteInterceptor.getMeta(metaName);
       let newMeta = false,
         newMethod = false;
       if (!meta) {
@@ -110,7 +110,7 @@ const ParamFactory = (paramFrom: paramFrom) => {
         meta.routes.push(methodMeta);
       }
       if (newMeta) {
-        RouteInceptor.registe(meta);
+        RouteInterceptor.addMeta(meta);
       }
     };
   };
@@ -119,16 +119,16 @@ const ParamFactory = (paramFrom: paramFrom) => {
 /**
  * http method
  */
-export const HttpGet = MethodFactory("get");
-export const HttpPost = MethodFactory("post");
-export const HttpPut = MethodFactory("put");
-export const HttpDelete = MethodFactory("delete");
-export const HttpPatch = MethodFactory("patch");
+export const Get = MethodFactory("get");
+export const Post = MethodFactory("post");
+export const Put = MethodFactory("put");
+export const Delete = MethodFactory("delete");
+export const Patch = MethodFactory("patch");
 /**
  * parameters from 
  */
-export const FromPath = ParamFactory("path");
-export const FromQuery = ParamFactory("query");
-export const FromBody = ParamFactory("body");
-export const FromHeader = ParamFactory("header");
-export const FromCookie = ParamFactory("cookie");
+export const Path = ParamFactory("path");
+export const Query = ParamFactory("query");
+export const Body = ParamFactory("body");
+export const Header = ParamFactory("header");
+export const Cookie = ParamFactory("cookie");

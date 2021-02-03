@@ -1,4 +1,4 @@
-# express-route-inceptor
+# express-route-interceptor
 
 > Author: Ducky Yang
 >
