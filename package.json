@@ -1,6 +1,6 @@
 {
   "name": "express-route-interceptor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A light-weight module to build restful api route with express",
   "main": "lib/main.js",
   "directories": {
@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@gitee.com:duckyYang/express-route-interceptor.git"
+    "url": "git@github.com:DuckyYang/express-route-interceptor.git"
   },
   "author": "Ducky Yang",
   "license": "MIT",
