@@ -1,7 +1,7 @@
 /*
  * @Author: Ducky Yang
  * @Date: 2021-02-03 15:05:35
- * @LastEditTime: 2021-02-04 11:35:34
+ * @LastEditTime: 2021-02-04 15:16:09
  * @LastEditors: Ducky Yang
  * @Description:
  * @FilePath: \express-route-interceptor\src\route-interceptor.ts
@@ -70,8 +70,14 @@ class RouteInterceptor {
    * @param methodMeta
    * @param paramName
    */
-  getParamMeta(methodMeta: RouteMethodMeta, paramName: string, paramFrom: ParamFrom) {
-    let paramMeta = methodMeta.params.filter((x) => x.name === paramName && x.from === paramFrom)[0];
+  getParamMeta(
+    methodMeta: RouteMethodMeta,
+    paramName: string,
+    paramFrom: ParamFrom
+  ) {
+    let paramMeta = methodMeta.params.filter(
+      (x) => x.name === paramName && x.from === paramFrom
+    )[0];
     if (!paramMeta) {
       paramMeta = new RouteParamMeta();
       paramMeta.name = paramName;
@@ -85,7 +91,7 @@ class RouteInterceptor {
    * bind routes to app
    * @param app express instance
    */
-  bind(app: core.Express, parser: ExpressParser) {
+  bind(app: core.Express, parser: ExpressParser, cls: any[]) {
     /**
      * use body parser
      */
@@ -96,71 +102,78 @@ class RouteInterceptor {
       this.Parser = "json";
       app.use(express.json());
     }
-    app.use(CookieParser())
+    app.use(CookieParser());
     //
     this.RouteMappings.forEach((routeMeta) => {
-      const router = express.Router();
       //
-      routeMeta.routes.forEach((methodMeta) => {
-        const { method, executor, template, params } = methodMeta;
+      const clsName = routeMeta.name;
+      const target = cls.filter((x) => x.name === clsName)[0];
+      // if class is bind
+      if (target) {
+        let instance = new target();
 
-        // common middleware for every request
-        const middleware = (
-          req: Request,
-          res: Response,
-          next: NextFunction
-        ) => {
-          //
-          let ps: any[] = [];
-          //
-          params
-            .sort((x) => x.index)
-            .forEach((p) => {
-              ps.push(this.extractParameters(req, p));
-            });
-          // call executor
-          let result = executor.call(routeMeta.instance, ...ps.reverse());
-          // if executor returns promise
-          if (result instanceof Promise) {
-            result
-              .then((value) => {
-                !res.headersSent && res.json(value);
-              })
-              .catch((err) => {
-                next(err);
+        const router = express.Router();
+        //
+        routeMeta.routes.forEach((methodMeta) => {
+          const { method, executor, template, params } = methodMeta;
+
+          // common middleware for every request
+          const middleware = (
+            req: Request,
+            res: Response,
+            next: NextFunction
+          ) => {
+            //
+            let ps: any[] = [];
+            //
+            params
+              .sort((x) => x.index)
+              .forEach((p) => {
+                ps.push(this.extractParameters(req, p));
               });
-          } else if (result) {
-            !res.headersSent && res.json(result);
-          }
-        };
-        router[<HttpMethod>method](template, middleware);
-      });
+            // call executor
+            let result = executor.call(instance, ...ps.reverse());
+            // if executor returns promise
+            if (result instanceof Promise) {
+              result
+                .then((value) => {
+                  !res.headersSent && res.json(value);
+                })
+                .catch((err) => {
+                  next(err);
+                });
+            } else if (result) {
+              !res.headersSent && res.json(result);
+            }
+          };
+          router[<HttpMethod>method](template, middleware);
+        });
 
-      app.use(routeMeta.prefix, router);
+        app.use(routeMeta.prefix, router);
+      }
     });
   }
   private extractParameters(req: Request, paramMeta: RouteParamMeta) {
-
     let paramHandler = {
-        "path":(name:string)=>{
-            return req.params[name];
-        },
-        "query":(name:string)=>{
-            return name ? req.query[name] : req.query;
-        },
-        "body":(name:string)=>{
-            return name ? req.body[name]:req.body;
-        },
-        "header":(name:string)=>{
-            return req.headers[name];
-        },
-        "cookie":(name:string)=>{
-            return req.cookies[name];
-        }
-    }
-    
+      path: (name: string) => {
+        return req.params[name];
+      },
+      query: (name: string) => {
+        return name ? req.query[name] : req.query;
+      },
+      body: (name: string) => {
+        return name ? req.body[name] : req.body;
+      },
+      header: (name: string) => {
+        return req.headers[name];
+      },
+      cookie: (name: string) => {
+        return req.cookies[name];
+      },
+    };
+
     let val = paramHandler[paramMeta.from](paramMeta.name);
-    
+
     if (paramMeta.type) {
       if (paramMeta.type === "boolean") {
         val = !!val;
@@ -170,6 +183,15 @@ class RouteInterceptor {
       }
     }
     return val;
+  }
+  /**
+   * use custom middleware for express, call this before call bind method
+   * @param app 
+   * @param middleware 
+   */
+  use(app: core.Express, middleware:(req:Request,res:Response,next:NextFunction)=>{}){
+    app.use(middleware);
+    return this;
   }
 }
 
