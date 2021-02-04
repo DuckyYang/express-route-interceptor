@@ -1,17 +1,14 @@
 /*
  * @Author: Ducky Yang
  * @Date: 2021-02-03 14:24:12
- * @LastEditTime: 2021-02-03 22:10:48
+ * @LastEditTime: 2021-02-04 10:19:29
  * @LastEditors: Ducky Yang
  * @Description: route decorator
- * @FilePath: /express-route-interceptor/src/route-decorator.ts
+ * @FilePath: \express-route-interceptor\src\route-decorator.ts
  */
 
 import {
-  RouteMeta,
-  RouteMethodMeta,
-  RouteParamMeta,
-  paramFrom,
+  ParamFrom, ParamType,
 } from "./route-meta";
 import RouteInterceptor from "./route-interceptor";
 
@@ -19,26 +16,16 @@ import RouteInterceptor from "./route-interceptor";
  *
  * @param prefix route prefix
  * ```
- * @RoutePrefix("api/users")
+ * @RoutePrefix("/api/users")
  * class UserController {}
  * ```
  */
 export function RoutePrefix(prefix: string) {
   return function (target: any) {
-    let newMeta = false;
     const metaName = target.name;
     let meta = RouteInterceptor.getMeta(metaName);
-    if (!meta) {
-      meta = new RouteMeta();
-      meta.name = metaName;
-
-      newMeta = true;
-    }
     meta.prefix = prefix;
-
-    if (newMeta) {
-      RouteInterceptor.addMeta(meta);
-    }
+    meta.instance = new target();
   };
 }
 
@@ -49,69 +36,32 @@ const MethodFactory = (httpMethod: string) => {
       methodName: string,
       descriptor: PropertyDescriptor
     ) => {
+      // 
       const metaName = target.constructor.name;
-
-      let newMeta = false,
-        newMethod = false;
+      // get route meta
       let meta = RouteInterceptor.getMeta(metaName);
-      if (!meta) {
-        meta = new RouteMeta();
-        meta.name = metaName;
-
-        newMeta = true;
-      }
-      let methodMeta = meta.routes.filter((x) => x.name === methodName)[0];
-      if (!methodMeta) {
-        methodMeta = new RouteMethodMeta();
-        methodMeta.name = methodName;
-
-        newMethod = true;
-      }
+      // get method meta of route
+      let methodMeta = RouteInterceptor.getMethodMeta(meta, methodName);
+      // bind 
       methodMeta.executor = typeof descriptor.value === "function" ? descriptor.value : ()=>{};
       methodMeta.method = httpMethod;
       methodMeta.template = template;
-
-      if (newMethod) {
-        meta.routes.push(methodMeta);
-      }
-      if (newMeta) {
-        RouteInterceptor.addMeta(meta);
-      }
     };
   };
 };
 
-const ParamFactory = (paramFrom: paramFrom) => {
-  return function (paramName: string) {
+const ParamFactory = (paramFrom: ParamFrom) => {
+  return function (paramName: string,type?:ParamType) {
     return function (target: any, methodName: string, parameterIndex: number) {
       const metaName = target.constructor.name;
       let meta = RouteInterceptor.getMeta(metaName);
-      let newMeta = false,
-        newMethod = false;
-      if (!meta) {
-        meta = new RouteMeta();
-        meta.name = metaName;
-
-        newMeta = true;
-      }
-      let methodMeta = meta.routes.filter((x) => x.name === methodName)[0];
-      if (!methodMeta) {
-        methodMeta = new RouteMethodMeta();
-        methodMeta.name = methodName;
-
-        newMethod = true;
-      }
-      let paramMeta = new RouteParamMeta();
+    
+      let methodMeta = RouteInterceptor.getMethodMeta(meta, methodName);
+      // bind
+      let paramMeta = RouteInterceptor.getParamMeta(methodMeta, paramName);
       paramMeta.index = parameterIndex;
-      paramMeta.name = paramName;
       paramMeta.from = paramFrom;
-      methodMeta.params.push(paramMeta);
-      if (newMethod) {
-        meta.routes.push(methodMeta);
-      }
-      if (newMeta) {
-        RouteInterceptor.addMeta(meta);
-      }
+      paramMeta.type = type;
     };
   };
 };

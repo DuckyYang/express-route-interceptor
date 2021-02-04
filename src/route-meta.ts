@@ -1,14 +1,15 @@
 /*
  * @Author: Ducky Yang
  * @Date: 2021-02-03 14:58:10
- * @LastEditTime: 2021-02-03 22:08:23
+ * @LastEditTime: 2021-02-04 09:32:09
  * @LastEditors: Ducky Yang
  * @Description:
- * @FilePath: /express-route-interceptor/src/route-meta.ts
+ * @FilePath: \express-route-interceptor\src\route-meta.ts
  */
 
-type paramFrom = "path" | "query" | "body" | "header" | "cookie";
-type httpMethod = "get" | "post" | "put" | "delete" | "patch";
+type ParamFrom = "path" | "query" | "body" | "header" | "cookie";
+type HttpMethod = "get" | "post" | "put" | "delete" | "patch";
+type ParamType = "boolean"|"number";
 
 class RouteMeta {
   /**
@@ -19,6 +20,10 @@ class RouteMeta {
    * route prefix
    */
   prefix: string = "";
+  /**
+   * current class instance used for when executor is called
+   */
+  instance: any;
   /**
    * route meta
    */
@@ -59,7 +64,11 @@ class RouteParamMeta {
   /**
    * where to get param value
    */
-  from: paramFrom = "path";
+  from: ParamFrom = "path";
+  /**
+   * if type is set, value will be cast
+   */
+  type?: ParamType;
 }
 
-export { RouteMeta, RouteMethodMeta, RouteParamMeta, paramFrom, httpMethod};
+export { RouteMeta, RouteMethodMeta, RouteParamMeta, ParamFrom, HttpMethod, ParamType};

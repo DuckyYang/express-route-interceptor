@@ -1,10 +1,10 @@
 /*
  * @Author: Ducky Yang
  * @Date: 2021-02-03 20:24:38
- * @LastEditTime: 2021-02-03 22:11:14
+ * @LastEditTime: 2021-02-04 10:34:30
  * @LastEditors: Ducky Yang
  * @Description:
- * @FilePath: /express-route-interceptor/test/app.ts
+ * @FilePath: \express-route-interceptor\test\app.ts
  * @
  */
 
@@ -21,20 +21,38 @@ import interceptor from "../src/route-interceptor";
 
 const app = express();
 
-@RoutePrefix("/api/users")
 class UserService {
+  constructor(){}
+  hello(id:number, name:string){
+    return [id, name,"hello world"] ;
+  }
+}
+
+@RoutePrefix("/api/users")
+class UserController {
+  userService: UserService;
+  constructor(){
+    this.userService = new UserService();
+  }
   @Get("/:id")
   async get(
-    @Path("id") id: number,
-    @Query("name") name: string
+    @Path("id","number") id: number,
+    @Query("") data: string
   ) {
-    return id;
+    return this.userService.hello(id, data);
   }
   @Post("")
-  async post(@Body("user") user: IUserModel) {
-    const ts = this;
-    return user.id + user.name;
+  async post(@Query("id","number")id:number, @Body("name") user: IUserModel) {
+   
+    return user;
   }
+}
+@RoutePrefix("/api/animals")
+class AnimalCtroller{
+   @Get("/:id")
+   eat(@Path("id")id:string, @Query("food")food: string){
+    return `${id} animal eat ${food}`;
+   }
 }
 
 interface IUserModel {
@@ -42,6 +60,7 @@ interface IUserModel {
   id: number;
 }
 
-interceptor.bind(app);
+
+interceptor.bind(app, "json");
 
 app.listen(8080, "localhost", () => {});
