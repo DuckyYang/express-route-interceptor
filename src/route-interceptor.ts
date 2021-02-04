@@ -1,7 +1,7 @@
 /*
  * @Author: Ducky Yang
  * @Date: 2021-02-03 15:05:35
- * @LastEditTime: 2021-02-04 10:29:49
+ * @LastEditTime: 2021-02-04 11:35:34
  * @LastEditors: Ducky Yang
  * @Description:
  * @FilePath: \express-route-interceptor\src\route-interceptor.ts
@@ -12,9 +12,11 @@ import {
   HttpMethod,
   RouteMethodMeta,
   RouteParamMeta,
+  ParamFrom,
 } from "./route-meta";
 import * as core from "express-serve-static-core";
 import express, { Request, Response, NextFunction } from "express";
+import CookieParser from "cookie-parser";
 
 export type ExpressParser = "json" | "urlencoded";
 
@@ -68,11 +70,12 @@ class RouteInterceptor {
    * @param methodMeta
    * @param paramName
    */
-  getParamMeta(methodMeta: RouteMethodMeta, paramName: string) {
-    let paramMeta = methodMeta.params.filter((x) => x.name === paramName)[0];
+  getParamMeta(methodMeta: RouteMethodMeta, paramName: string, paramFrom: ParamFrom) {
+    let paramMeta = methodMeta.params.filter((x) => x.name === paramName && x.from === paramFrom)[0];
     if (!paramMeta) {
       paramMeta = new RouteParamMeta();
       paramMeta.name = paramName;
+      paramMeta.from = paramFrom;
 
       methodMeta.params.push(paramMeta);
     }
@@ -93,7 +96,7 @@ class RouteInterceptor {
       this.Parser = "json";
       app.use(express.json());
     }
-
+    app.use(CookieParser())
     //
     this.RouteMappings.forEach((routeMeta) => {
       const router = express.Router();
@@ -113,7 +116,7 @@ class RouteInterceptor {
           params
             .sort((x) => x.index)
             .forEach((p) => {
-              ps.push(this.prepareVal(req, p));
+              ps.push(this.extractParameters(req, p));
             });
           // call executor
           let result = executor.call(routeMeta.instance, ...ps.reverse());
@@ -136,38 +139,28 @@ class RouteInterceptor {
       app.use(routeMeta.prefix, router);
     });
   }
-  private prepareVal(req: Request, paramMeta: RouteParamMeta) {
-    /**
-     * To-do: type cast for number or boolean
-     */
-    let val;
-    switch (paramMeta.from) {
-      case "path":
-        val = req.params[paramMeta.name];
-        break;
-      case "body":
-        // if param's name is not empty, try to get. Otherwise do nothing.
-        if (paramMeta.name) {
-            val = req.body[paramMeta.name];
-        } else {
-            val = req.body;
+  private extractParameters(req: Request, paramMeta: RouteParamMeta) {
+
+    let paramHandler = {
+        "path":(name:string)=>{
+            return req.params[name];
+        },
+        "query":(name:string)=>{
+            return name ? req.query[name] : req.query;
+        },
+        "body":(name:string)=>{
+            return name ? req.body[name]:req.body;
+        },
+        "header":(name:string)=>{
+            return req.headers[name];
+        },
+        "cookie":(name:string)=>{
+            return req.cookies[name];
         }
-        break;
-      case "header":
-        val = req.headers[paramMeta.name];
-        break;
-      case "cookie":
-        val = req.cookies[paramMeta.name];
-        break;
-      case "query":
-      default:
-        if (paramMeta.name) {
-            val = req.query[paramMeta.name];
-        } else {
-            val = req.query;
-        }
-        break;
     }
+    
+    let val = paramHandler[paramMeta.from](paramMeta.name);
+    
     if (paramMeta.type) {
       if (paramMeta.type === "boolean") {
         val = !!val;

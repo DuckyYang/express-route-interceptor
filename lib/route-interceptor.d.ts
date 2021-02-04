@@ -1,4 +1,4 @@
-import { RouteMeta, RouteMethodMeta, RouteParamMeta } from "./route-meta";
+import { RouteMeta, RouteMethodMeta, RouteParamMeta, ParamFrom } from "./route-meta";
 import * as core from "express-serve-static-core";
 export declare type ExpressParser = "json" | "urlencoded";
 /**
@@ -31,13 +31,13 @@ declare class RouteInterceptor {
      * @param methodMeta
      * @param paramName
      */
-    getParamMeta(methodMeta: RouteMethodMeta, paramName: string): RouteParamMeta;
+    getParamMeta(methodMeta: RouteMethodMeta, paramName: string, paramFrom: ParamFrom): RouteParamMeta;
     /**
      * bind routes to app
      * @param app express instance
      */
     bind(app: core.Express, parser: ExpressParser): void;
-    private prepareVal;
+    private extractParameters;
 }
 declare const interceptor: RouteInterceptor;
 export default interceptor;

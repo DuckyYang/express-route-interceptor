@@ -2,7 +2,7 @@
  *
  * @param prefix route prefix
  * ```
- * @RoutePrefix("api/users")
+ * @RoutePrefix("/api/users")
  * class UserController {}
  * ```
  */
