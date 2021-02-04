@@ -7,7 +7,21 @@
 #### 
 > A light-weight module to build restful api route with express
 >
-> Thanks for @WinfredWang's guide,and his repo is https://github.com/WinfredWang/express-decorator
+> ##### Thanks for @WinfredWang's article and his repo is `https://github.com/WinfredWang/express-decorator`
+
+### Install
+
+```
+npm install express-route-interceptor
+```
+
+### Features
+
+- Use `@RoutePrefix` to define rest api prefix for class.
+- Use `@Get/@Post/@Put/@Delete/@Patch` to define rest api template for method.
+- Use `@Path/@Query/@Body/@Header/@Cookie` to inject parameter's value.
+- If query parameters are too many, you can set empty `paramName` for `@Query` like `@Query("")queryData: any`. Then queryData will contains all parameters. 
+- If you want to get specified parameter from body, you can set `paramName` for `@Body` like `@Body("name")name:string`. Then name will be filled if body contains key of name. But this is not recommended. 
 
 ### Quick Start
 
@@ -42,3 +56,48 @@ class UserCtroller {
 }
 ```
 
+Bind to your app
+
+```javascript
+ import express from "express";
+
+ import { RouteInterceptor } from "express-route-interceptor";
+
+ const app = express();
+ // bind to app and use json parser
+ RouteInterceptor.bind(app, "json");
+
+ app.listen(8080,"localhost",()=>{});
+```
+
+### API
+
+#### Bind To Express App
+> Call bind method before app runs
+
+- `RouteInterceptor.bind(app: core.Express, parser: ExpressParser)`
+
+#### Route Prefix
+> Define api base url prefix, like `/api/users`
+
+- `RoutePrefix(prefix: string)`
+#### Route Action
+> Define api action url template, like `/:id` or `/man/:name`
+
+- `Get(template: string)`
+- `Post(template: string)`
+- `Put(template: string)`
+- `Delete(template: string)`
+- `Patch(template: string)`
+#### Route Action Parameters
+> Define where to get parameter's value
+
+- `Path(paramName: string, type?: "number" | "boolean" | undefined)` 
+- `Query(paramName: string, type?: "number" | "boolean" | undefined)`
+- `Body(paramName: string, type?: "number" | "boolean" | undefined)`
+- `Cookie(paramName: string, type?: "number" | "boolean" | undefined)`
+- `Header(paramName: string, type?: "number" | "boolean" | undefined)`
+
+##### Parameters
+- `paramName`: Parameter name
+- `type`: If the type is set, the value will be converted.Only support `number` and `boolean`
