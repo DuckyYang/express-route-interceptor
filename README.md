@@ -65,7 +65,7 @@ Bind to your app
 
  const app = express();
  // bind to app and use json parser
- RouteInterceptor.bind(app, "json");
+ RouteInterceptor.bind(app, "json", [UserCtroller]);
 
  app.listen(8080,"localhost",()=>{});
 ```
@@ -75,7 +75,8 @@ Bind to your app
 #### Bind To Express App
 > Call bind method before app runs
 
-- `RouteInterceptor.bind(app: core.Express, parser: ExpressParser)`
+- `RouteInterceptor.bind(app: core.Express, parser: ExpressParser)`: bind route meta
+- `RouteInterceptor.use(app: core.Express, middleware:(req:Request,res:Response,next:NextFunction)=>{})`: use custom middleware. call this before bind method.
 
 #### Route Prefix
 > Define api base url prefix, like `/api/users`
