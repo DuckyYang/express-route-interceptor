@@ -1,37 +1,103 @@
-# express-route-inceptor
+# express-route-interceptor
 
-#### 介绍
-A light-weight module to build restful api route with express
+> Author: Ducky Yang
+>
+> Email: duckyyang@vip.qq.com
 
-#### 软件架构
-软件架构说明
+#### 
+> A light-weight module to build restful api route with express
+>
+> ##### Thanks for @WinfredWang's article and his repo is `https://github.com/WinfredWang/express-decorator`
 
+### Install
 
-#### 安装教程
+```
+npm install express-route-interceptor
+```
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+### Features
 
-#### 使用说明
+- Use `@RoutePrefix` to define rest api prefix for class.
+- Use `@Get/@Post/@Put/@Delete/@Patch` to define rest api template for method.
+- Use `@Path/@Query/@Body/@Header/@Cookie` to inject parameter's value.
+- If query parameters are too many, you can set empty `paramName` for `@Query` like `@Query("")queryData: any`. Then queryData will contains all parameters. 
+- If you want to get specified parameter from body, you can set `paramName` for `@Body` like `@Body("name")name:string`. Then name will be filled if body contains key of name. But this is not recommended. 
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+### Quick Start
 
-#### 参与贡献
+Create first restful api controller
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+```javascript
+interface IUserModel {
+    name: string;
+    age: number;
+}
+interface IPageModel {
+    pageNo: number;
+    pageSize: number;
+}
 
+@RoutePrefix("/api/users")
+class UserCtroller {
+    @Get("/:id")
+    async get(@Path("id","number")id:number) {
+        return `hello world ${id}`;
+    }
 
-#### 特技
+    @Post("") 
+    async post(@Body("")user: IUserModel) {
+        return `hello ${user.name}`;
+    }
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+    @Get("")
+    async page(@Query("")page: IPageModel){
+        return userService.page(page.pageNo,page.pageSize);
+    }
+}
+```
+
+Bind to your app
+
+```javascript
+ import express from "express";
+
+ import { RouteInterceptor } from "express-route-interceptor";
+
+ const app = express();
+ // bind to app and use json parser
+ RouteInterceptor.bind(app, "json");
+
+ app.listen(8080,"localhost",()=>{});
+```
+
+### API
+
+#### Bind To Express App
+> Call bind method before app runs
+
+- `RouteInterceptor.bind(app: core.Express, parser: ExpressParser)`
+
+#### Route Prefix
+> Define api base url prefix, like `/api/users`
+
+- `RoutePrefix(prefix: string)`
+#### Route Action
+> Define api action url template, like `/:id` or `/man/:name`
+
+- `Get(template: string)`
+- `Post(template: string)`
+- `Put(template: string)`
+- `Delete(template: string)`
+- `Patch(template: string)`
+#### Route Action Parameters
+> Define where to get parameter's value
+
+- `Path(paramName: string, type?: "number" | "boolean" | undefined)` 
+- `Query(paramName: string, type?: "number" | "boolean" | undefined)`
+- `Body(paramName: string, type?: "number" | "boolean" | undefined)`
+- `Cookie(paramName: string, type?: "number" | "boolean" | undefined)`
+- `Header(paramName: string, type?: "number" | "boolean" | undefined)`
+
+##### Parameters
+- `paramName`: Parameter name
+- `type`: If the type is set, the value will be converted.Only support `number` and `boolean`
