@@ -1,7 +1,7 @@
 /*
  * @Author: Ducky Yang
  * @Date: 2021-02-03 14:24:12
- * @LastEditTime: 2021-02-04 10:19:29
+ * @LastEditTime: 2021-02-04 11:35:43
  * @LastEditors: Ducky Yang
  * @Description: route decorator
  * @FilePath: \express-route-interceptor\src\route-decorator.ts
@@ -58,9 +58,8 @@ const ParamFactory = (paramFrom: ParamFrom) => {
     
       let methodMeta = RouteInterceptor.getMethodMeta(meta, methodName);
       // bind
-      let paramMeta = RouteInterceptor.getParamMeta(methodMeta, paramName);
+      let paramMeta = RouteInterceptor.getParamMeta(methodMeta, paramName, paramFrom);
       paramMeta.index = parameterIndex;
-      paramMeta.from = paramFrom;
       paramMeta.type = type;
     };
   };
