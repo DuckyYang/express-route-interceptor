@@ -1,7 +1,7 @@
 /*
  * @Author: Ducky Yang
  * @Date: 2021-02-03 14:58:10
- * @LastEditTime: 2021-02-04 09:32:09
+ * @LastEditTime: 2021-02-04 15:02:56
  * @LastEditors: Ducky Yang
  * @Description:
  * @FilePath: \express-route-interceptor\src\route-meta.ts
@@ -20,10 +20,6 @@ class RouteMeta {
    * route prefix
    */
   prefix: string = "";
-  /**
-   * current class instance used for when executor is called
-   */
-  instance: any;
   /**
    * route meta
    */

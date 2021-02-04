@@ -1,7 +1,7 @@
 /*
  * @Author: Ducky Yang
  * @Date: 2021-02-03 14:24:12
- * @LastEditTime: 2021-02-04 11:35:43
+ * @LastEditTime: 2021-02-04 15:03:03
  * @LastEditors: Ducky Yang
  * @Description: route decorator
  * @FilePath: \express-route-interceptor\src\route-decorator.ts
@@ -25,7 +25,6 @@ export function RoutePrefix(prefix: string) {
     const metaName = target.name;
     let meta = RouteInterceptor.getMeta(metaName);
     meta.prefix = prefix;
-    meta.instance = new target();
   };
 }
 
