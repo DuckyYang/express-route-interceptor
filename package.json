@@ -1,6 +1,6 @@
 {
   "name": "express-route-interceptor",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A light-weight module to build restful api route with express",
   "main": "lib/main.js",
   "directories": {
